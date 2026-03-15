@@ -12,7 +12,9 @@ from app.logger import logger
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
-    logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION} in {settings.ENV} mode")
+    logger.info(
+        f"Starting {settings.APP_NAME} v{settings.APP_VERSION} in {settings.ENV} mode"
+    )
     init_db()
     yield
     logger.info("Shutting down application")
@@ -23,7 +25,7 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="User Service for SmartCampus Bot - Manage user profiles and authentication",
     lifespan=lifespan,
-    debug=settings.DEBUG
+    debug=settings.DEBUG,
 )
 
 # CORS middleware
@@ -42,10 +44,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     logger.error(f"Validation error: {exc.errors()}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "detail": "Validation error",
-            "errors": exc.errors()
-        }
+        content={"detail": "Validation error", "errors": exc.errors()},
     )
 
 
@@ -56,8 +55,8 @@ async def general_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "detail": "Internal server error",
-            "error": str(exc) if settings.DEBUG else "An error occurred"
-        }
+            "error": str(exc) if settings.DEBUG else "An error occurred",
+        },
     )
 
 
@@ -73,7 +72,7 @@ async def health_check():
         "status": "healthy",
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "environment": settings.ENV
+        "environment": settings.ENV,
     }
 
 
@@ -84,5 +83,5 @@ async def root():
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }

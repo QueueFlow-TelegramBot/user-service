@@ -21,24 +21,29 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     try:
         # Check if user already exists
-        existing_user = db.query(User).filter(User.telegram_id == user_data.telegram_id).first()
+        existing_user = (
+            db.query(User).filter(User.telegram_id == user_data.telegram_id).first()
+        )
         if existing_user:
-            logger.warning(f"User already exists with telegram_id: {user_data.telegram_id}")
+            logger.warning(
+                f"User already exists with telegram_id: {user_data.telegram_id}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="User with this telegram_id already exists"
+                detail="User with this telegram_id already exists",
             )
 
         # Create new user
         new_user = User(
-            telegram_id=user_data.telegram_id,
-            display_name=user_data.display_name
+            telegram_id=user_data.telegram_id, display_name=user_data.display_name
         )
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
 
-        logger.info(f"User created: id={new_user.id}, telegram_id={new_user.telegram_id}")
+        logger.info(
+            f"User created: id={new_user.id}, telegram_id={new_user.telegram_id}"
+        )
         return new_user
 
     except IntegrityError as e:
@@ -46,14 +51,17 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         logger.error(f"Database integrity error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Database constraint violation"
+            detail="Database constraint violation",
         )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error creating user: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -61,7 +69,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
 def update_user(
     user_data: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Update current user's display name (requires authentication).
@@ -73,15 +81,20 @@ def update_user(
         db.commit()
         db.refresh(current_user)
 
-        logger.info(f"User updated: id={current_user.id}, new_name={current_user.display_name}")
+        logger.info(
+            f"User updated: id={current_user.id}, new_name={current_user.display_name}"
+        )
         return current_user
 
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error updating user: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -103,8 +116,7 @@ def get_user_by_telegram_id(telegram_id: str, db: Session = Depends(get_db)):
     if not user:
         logger.warning(f"User not found: telegram_id={telegram_id}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     logger.info(f"User retrieved: id={user.id}, telegram_id={telegram_id}")
@@ -122,8 +134,7 @@ def login(telegram_id: str, db: Session = Depends(get_db)):
     if not user:
         logger.warning(f"Login failed: user not found with telegram_id={telegram_id}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     access_token = create_access_token(data={"sub": user.telegram_id})

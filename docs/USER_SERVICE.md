@@ -1,15 +1,4 @@
-# User Service - Project Summary
-
-## What We Built
-
-A complete **User Service** for the SmartCampus Bot with:
-- ✅ FastAPI backend with JWT authentication
-- ✅ PostgreSQL database integration
-- ✅ Docker setup for local development
-- ✅ Comprehensive unit tests (pytest)
-- ✅ Structured logging
-- ✅ OpenAPI/Swagger documentation
-- ✅ Config management with .env files
+# User Service - Summary
 
 ## Project Structure
 
@@ -134,7 +123,7 @@ curl -X GET http://localhost:8000/user/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-**No real Telegram ID needed!** Use any string like `"test_123"`, `"dinu_dev"`, etc.
+**No real Telegram ID needed!** Use any string like `"test_123"`, `"test_dev"`, etc.
 
 ## Key Features
 
@@ -199,25 +188,6 @@ display_name = user_data["display_name"]
 - **pytest** - Testing framework
 - **Docker** - Containerization
 - **Uvicorn** - ASGI server
-
-## Task Requirements Checklist
-
-✅ Build user-service with FastAPI
-✅ Token-based authentication (JWT)
-✅ Protect all action/mutation endpoints (PUT /user)
-✅ Expose endpoints with Swagger/OpenAPI docs
-✅ Structured logging (JSON format)
-✅ Proper error responses (400, 401, 404, 409, 500)
-✅ Docker support for local testing
-✅ Config for ease of running locally/dev
-✅ .env and .env.example files
-
-## Next Steps
-
-1. **Analytics Service** - Track metrics (avg wait time, events, success/fail)
-2. **Architecture Diagram** - All services, broker, DB, bot
-3. **Technical Documentation** - Components, flow, technologies
-4. **notification-worker** - RabbitMQ consumer (if needed separately from bot)
 
 ## Useful Resources
 

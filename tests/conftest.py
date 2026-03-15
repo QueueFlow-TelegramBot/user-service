@@ -1,4 +1,5 @@
 import pytest
+from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -33,34 +34,36 @@ def db_session():
 @pytest.fixture(scope="function")
 def client(db_session):
     """Create a test client with test database."""
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
 
+    @asynccontextmanager
+    async def test_lifespan(_app):
+        yield
+
+    original_lifespan = app.router.lifespan_context
     app.dependency_overrides[get_db] = override_get_db
+    app.router.lifespan_context = test_lifespan
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+    app.router.lifespan_context = original_lifespan
 
 
 @pytest.fixture
 def test_user_data():
     """Sample user data for testing."""
-    return {
-        "telegram_id": "test_user_123",
-        "display_name": "Test User"
-    }
+    return {"telegram_id": "test_user_123", "display_name": "Test User"}
 
 
 @pytest.fixture
 def another_user_data():
     """Another sample user data for testing."""
-    return {
-        "telegram_id": "test_user_456",
-        "display_name": "Another Test User"
-    }
+    return {"telegram_id": "test_user_456", "display_name": "Another Test User"}
 
 
 @pytest.fixture

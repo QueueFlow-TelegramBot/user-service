@@ -18,7 +18,9 @@ class TestJWTAuth:
         assert len(token) > 0
 
         # Decode and verify
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
         assert payload["sub"] == "test_user_123"
         assert "exp" in payload
 
@@ -28,7 +30,9 @@ class TestJWTAuth:
         expires_delta = timedelta(minutes=5)
         token = create_access_token(data, expires_delta)
 
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
         assert payload["sub"] == "test_user_123"
 
     def test_token_contains_expiration(self):
@@ -36,5 +40,7 @@ class TestJWTAuth:
         data = {"sub": "test_user_123"}
         token = create_access_token(data)
 
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
         assert "exp" in payload

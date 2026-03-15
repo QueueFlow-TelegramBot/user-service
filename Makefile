@@ -1,35 +1,40 @@
-.PHONY: help install install-dev run docker-up docker-down docker-build test test-cov clean logs
+.PHONY: help install install-dev compile-requirements run docker-up docker-down docker-build test test-cov clean logs
+
+REQ_DIR=requirements
 
 help:
 	@echo "User Service - Available commands:"
-	@echo "  make install      - Create venv and install dependencies"
-	@echo "  make install-dev  - Install dev dependencies (includes test tools)"
-	@echo "  make run          - Run service locally"
-	@echo "  make test         - Run tests with pytest"
-	@echo "  make test-cov     - Run tests with coverage report"
-	@echo "  make docker-up    - Start services with Docker Compose"
-	@echo "  make docker-down  - Stop Docker Compose services"
-	@echo "  make docker-build - Rebuild Docker images"
-	@echo "  make logs         - Show Docker logs"
-	@echo "  make clean        - Clean up Python cache and venv"
+	@echo "  make install      		- Create venv and install dependencies"
+	@echo "  make install-dev  		- Install dev dependencies (includes test tools)"
+	@echo "  make compile-requirements 	- Rebuild lock files with pip-tools"
+	@echo "  make test         		- Run tests with pytest"
+	@echo "  make test-cov     		- Run tests with coverage report"
+	@echo "  make docker-up    		- Start services with Docker Compose"
+	@echo "  make docker-down  		- Stop Docker Compose services"
+	@echo "  make docker-build 		- Rebuild Docker images"
+	@echo "  make logs         		- Show Docker logs"
+	@echo "  make clean        		- Clean up Python cache and venv"
 
 install:
 	@echo "Creating virtual environment..."
 	python3 -m venv venv
 	@echo "Installing dependencies..."
-	./venv/bin/pip install -r requirements.txt
+	cd $(REQ_DIR) && ../venv/bin/pip install -r base.txt
 	@echo "Done! Activate with: source venv/bin/activate"
 
 install-dev:
 	@echo "Creating virtual environment..."
 	python3 -m venv venv
 	@echo "Installing dev dependencies..."
-	./venv/bin/pip install -r requirements-dev.txt
+	cd $(REQ_DIR) && ../venv/bin/pip install -r dev.txt
 	@echo "Done! Activate with: source venv/bin/activate"
 
-run:
-	@echo "Starting User Service..."
-	./start.sh
+compile-requirements:
+	@echo "Compiling requirement lock files..."
+	./venv/bin/pip install pip-tools
+	cd $(REQ_DIR) && ../venv/bin/pip-compile base.in --output-file base.txt
+	cd $(REQ_DIR) && ../venv/bin/pip-compile dev.in --output-file dev.txt
+	@echo "Requirements lock files updated."
 
 docker-up:
 	@echo "Starting services with Docker Compose..."

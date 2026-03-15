@@ -39,10 +39,9 @@ class TestCreateUser:
 
     def test_create_user_empty_display_name(self, client):
         """Test creating user with empty display_name fails."""
-        response = client.post("/user", json={
-            "telegram_id": "test_123",
-            "display_name": ""
-        })
+        response = client.post(
+            "/user", json={"telegram_id": "test_123", "display_name": ""}
+        )
         assert response.status_code == 422
 
 
@@ -55,7 +54,7 @@ class TestUpdateUser:
         response = client.put(
             "/user",
             json={"display_name": new_name},
-            headers={"Authorization": f"Bearer {get_auth_token}"}
+            headers={"Authorization": f"Bearer {get_auth_token}"},
         )
 
         assert response.status_code == 200
@@ -66,14 +65,14 @@ class TestUpdateUser:
     def test_update_user_without_auth(self, client):
         """Test updating user without authentication fails."""
         response = client.put("/user", json={"display_name": "New Name"})
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_update_user_invalid_token(self, client):
         """Test updating user with invalid token fails."""
         response = client.put(
             "/user",
             json={"display_name": "New Name"},
-            headers={"Authorization": "Bearer invalid_token"}
+            headers={"Authorization": "Bearer invalid_token"},
         )
         assert response.status_code == 401
 
@@ -82,7 +81,7 @@ class TestUpdateUser:
         response = client.put(
             "/user",
             json={"display_name": ""},
-            headers={"Authorization": f"Bearer {get_auth_token}"}
+            headers={"Authorization": f"Bearer {get_auth_token}"},
         )
         assert response.status_code == 422
 
@@ -108,8 +107,7 @@ class TestGetUser:
     def test_get_current_user(self, client, test_user_data, get_auth_token):
         """Test getting current user info."""
         response = client.get(
-            "/user/me",
-            headers={"Authorization": f"Bearer {get_auth_token}"}
+            "/user/me", headers={"Authorization": f"Bearer {get_auth_token}"}
         )
 
         assert response.status_code == 200
@@ -119,7 +117,7 @@ class TestGetUser:
     def test_get_current_user_without_auth(self, client):
         """Test getting current user without authentication fails."""
         response = client.get("/user/me")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestTokenGeneration:
@@ -127,7 +125,9 @@ class TestTokenGeneration:
 
     def test_generate_token_success(self, client, test_user_data, create_test_user):
         """Test successful token generation."""
-        response = client.post(f"/user/token?telegram_id={test_user_data['telegram_id']}")
+        response = client.post(
+            f"/user/token?telegram_id={test_user_data['telegram_id']}"
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -143,14 +143,13 @@ class TestTokenGeneration:
     def test_token_is_valid(self, client, test_user_data, create_test_user):
         """Test that generated token works for authentication."""
         # Generate token
-        token_response = client.post(f"/user/token?telegram_id={test_user_data['telegram_id']}")
+        token_response = client.post(
+            f"/user/token?telegram_id={test_user_data['telegram_id']}"
+        )
         token = token_response.json()["access_token"]
 
         # Use token to access protected endpoint
-        response = client.get(
-            "/user/me",
-            headers={"Authorization": f"Bearer {token}"}
-        )
+        response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
 
         assert response.status_code == 200
         assert response.json()["telegram_id"] == test_user_data["telegram_id"]
@@ -175,18 +174,22 @@ class TestMultipleUsers:
         client.post("/user", json=another_user_data)
 
         # Get token for first user
-        token_response = client.post(f"/user/token?telegram_id={test_user_data['telegram_id']}")
+        token_response = client.post(
+            f"/user/token?telegram_id={test_user_data['telegram_id']}"
+        )
         token = token_response.json()["access_token"]
 
         # Update with first user's token
         response = client.put(
             "/user",
             json={"display_name": "Updated Name"},
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"},
         )
 
         assert response.status_code == 200
 
         # Verify second user is unchanged
         user2_response = client.get(f"/user/{another_user_data['telegram_id']}")
-        assert user2_response.json()["display_name"] == another_user_data["display_name"]
+        assert (
+            user2_response.json()["display_name"] == another_user_data["display_name"]
+        )

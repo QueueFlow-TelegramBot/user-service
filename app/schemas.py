@@ -5,11 +5,15 @@ from typing import Optional
 
 class UserCreate(BaseModel):
     telegram_id: str = Field(..., description="Telegram user ID")
-    display_name: str = Field(..., min_length=1, max_length=100, description="User display name")
+    display_name: str = Field(
+        ..., min_length=1, max_length=100, description="User display name"
+    )
 
 
 class UserUpdate(BaseModel):
-    display_name: str = Field(..., min_length=1, max_length=100, description="Updated display name")
+    display_name: str = Field(
+        ..., min_length=1, max_length=100, description="Updated display name"
+    )
 
 
 class UserResponse(BaseModel):
