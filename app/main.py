@@ -9,6 +9,9 @@ from app.routers import users
 from app.logger import logger
 
 
+STOPED = False
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
@@ -68,12 +71,11 @@ app.include_router(users.router)
 @app.get("/health", tags=["health"])
 async def health_check():
     """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "service": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "environment": settings.ENV,
-    }
+    if STOPED:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "unhealthy", "reason": "Service is stopping"},
+        )
 
 
 @app.get("/", tags=["root"])
@@ -85,3 +87,10 @@ async def root():
         "docs": "/docs",
         "health": "/health",
     }
+
+
+@app.get("/stop", tags=["control"])
+async def stop_server():
+    global STOPED
+    STOPED = not STOPED
+    return {"message": "Updated"}
